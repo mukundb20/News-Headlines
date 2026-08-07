@@ -2,7 +2,7 @@
   "name": "News Headlines",
   "short_name": "News Headlines",
   "description": "Live News Headlines feed reader",
-  "start_url": "/",
+  "start_url": "/News.html",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0a0c12",

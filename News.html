@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0c12">
+    <meta name="apple-mobile-web-app-title" content="News Headlines">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <title>News Headlines</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box; margin: 0; padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+        html { height: 100%; height: 100dvh; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Roboto, sans-serif;
+            background: #0a0c12;
+            color: #f5f5f7;
+            height: 100%; height: 100dvh;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            position: fixed; inset: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overscroll-behavior: none;
+            -webkit-user-select: none; user-select: none;
+        }
+
+        /* Background glow */
+        #bgGlow {
+            position: fixed; top: -120px; left: 50%;
+            transform: translateX(-50%);
+            width: 380px; height: 380px;
+            border-radius: 50%;
+            background: #4285F4;
+            opacity: 0.07;
+            filter: blur(70px);
+            pointer-events: none; z-index: 0;
+            transition: background 0.7s ease;
+        }
+
+        /* ── Header ── */
+        .header {
+            padding-top: max(env(safe-area-inset-top, 0px), 18px);
+            padding-bottom: 10px;
+            padding-left: 20px; padding-right: 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; z-index: 10; flex-shrink: 0;
+        }
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; }
+        .g1{color:#4285F4}.o1{color:#EA4335}.o2{color:#FBBC05}
+        .g2{color:#4285F4}.l{color:#34A853}.e{color:#EA4335}
+        .news-suffix { color:rgba(255,255,255,.55); font-weight:400; }
+
+        .header-right { display:flex; align-items:center; gap:8px; }
+        .hd-section {
+            font-size: 12.5px; font-weight: 600;
+            color: rgba(255,255,255,.45);
+            max-width: 100px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .live-pill {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(234,67,53,.12);
+            border: 1px solid rgba(234,67,53,.28);
+            padding: 4px 9px; border-radius: 20px;
+        }
+        .live-dot {
+            width: 6px; height: 6px;
+            background: #EA4335; border-radius: 50%;
+            animation: blink 1.4s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+        .live-label { font-size: 10px; font-weight: 800; color:#EA4335; letter-spacing:1.2px; }
+
+        .audio-btn {
+            background: none;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 50%;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0;
+            cursor: pointer; color: rgba(255,255,255,.4);
+            flex-shrink: 0;
+            transition: background .2s, border-color .2s, color .2s, transform .1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .audio-btn svg { width: 15px; height: 15px; display: block; flex-shrink: 0; }
+        .audio-btn.on {
+            background: rgba(255,255,255,.1);
+            border-color: rgba(255,255,255,.3);
+            color: rgba(255,255,255,.9);
+        }
+        .audio-btn:active { transform: scale(0.88); }
+
+        /* ── Story bars ── */
+        .story-bars {
+            display: flex; gap: 4px;
+            padding: 0 20px 10px;
+            position: relative; z-index: 10; flex-shrink: 0;
+            min-height: 17px;
+        }
+        .s-bar {
+            flex: 1; height: 3px;
+            background: rgba(255,255,255,.18);
+            border-radius: 2px; overflow: hidden;
+        }
+        .s-bar-fill { height:100%; border-radius:2px; background:white; width:0%; }
+        .s-bar.done .s-bar-fill { width:100%; }
+
+        /* ── Main ── */
+        .main {
+            flex: 1; min-height: 0;
+            padding: 0 16px 12px;
+            position: relative; z-index: 5;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: rgba(18, 20, 30, 0.86);
+            border: 1px solid rgba(255,255,255,.07);
+            border-radius: 24px;
+            padding: 26px 22px 22px;
+            display: flex; flex-direction: column;
+            flex: 1; min-height: 0;
+            position: relative; overflow: hidden;
+            backdrop-filter: saturate(160%) blur(24px);
+            -webkit-backdrop-filter: saturate(160%) blur(24px);
+            will-change: transform;
+            cursor: grab; touch-action: none;
+        }
+        .card:active { cursor: grabbing; }
+        .card::before {
+            content: '';
+            position: absolute; top: 0; left: 28px; right: 28px;
+            height: 2.5px;
+            background: var(--sc, white);
+            border-radius: 0 0 3px 3px;
+            opacity: 0.75;
+        }
+
+        /* Card content */
+        .badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 13px; border-radius: 100px;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.1);
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .7px;
+            color: var(--sc, white);
+            align-self: flex-start; margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        .badge-emoji { font-size: 13px; }
+
+        .news-title {
+            font-size: clamp(30px, 8.6vw, 56px);
+            font-weight: 800; line-height: 1.32;
+            color: #f0f2f7; letter-spacing: -0.8px;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            -webkit-user-select: text; user-select: text;
+            padding-bottom: 4px;
+        }
+        .news-title::-webkit-scrollbar { width: 3px; }
+        .news-title::-webkit-scrollbar-track { background: transparent; }
+        .news-title::-webkit-scrollbar-thumb { background: rgba(255,255,255,.22); border-radius: 2px; }
+
+        .read-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; width: 100%;
+            background: var(--sc, #4285F4); color: white;
+            padding: 17px 22px; border-radius: 16px;
+            text-decoration: none;
+            font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+            flex-shrink: 0;
+            margin-top: 16px;
+            transition: transform .1s, opacity .1s;
+        }
+        .read-btn:active { transform: scale(0.97); opacity: .82; }
+        .read-btn-arrow { opacity: .75; }
+
+        /* States */
+        .card-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            flex: 1; gap: 12px; color: rgba(255,255,255,.35);
+        }
+        .spinner {
+            width: 30px; height: 30px;
+            border: 2.5px solid rgba(255,255,255,.1);
+            border-top-color: var(--sc, #4285F4);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .state-label { font-size: 14px; font-weight: 500; }
+        .state-sub   { font-size: 12px; opacity: .6; }
+        .state-big   { font-size: 38px; }
+
+        /* Card slide animations */
+        @keyframes fromRight { from{opacity:0;transform:translateX(72px) scale(.94)} to{opacity:1;transform:none} }
+        @keyframes fromLeft  { from{opacity:0;transform:translateX(-72px) scale(.94)} to{opacity:1;transform:none} }
+        @keyframes fromBelow { from{opacity:0;transform:translateY(40px) scale(.96)} to{opacity:1;transform:none} }
+        .enter-r { animation: fromRight .38s cubic-bezier(.16,1,.3,1); }
+        .enter-l { animation: fromLeft  .38s cubic-bezier(.16,1,.3,1); }
+        .enter-u { animation: fromBelow .4s  cubic-bezier(.16,1,.3,1); }
+
+        /* Swipe indicator overlays */
+        .swipe-overlay {
+            position: absolute; inset: 0; border-radius: 24px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 32px; font-weight: 700; letter-spacing: -1px;
+            pointer-events: none; opacity: 0;
+            transition: opacity .1s;
+        }
+
+        /* ── Tab bar ── */
+        .tab-bar {
+            background: rgba(8, 10, 16, 0.88);
+            border-top: 1px solid rgba(255,255,255,.06);
+            padding-top: 6px;
+            padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+            flex-shrink: 0; position: relative; z-index: 10;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .tab-scroll {
+            display: flex; overflow-x: auto;
+            padding: 0 6px;
+            scrollbar-width: none; -ms-overflow-style: none;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab-scroll::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            padding: 4px 10px 4px;
+            border: none; background: none; cursor: pointer;
+            min-width: 58px; flex-shrink: 0;
+            scroll-snap-align: start;
+        }
+        .tab-icon-box {
+            width: 44px; height: 44px; border-radius: 13px;
+            background: rgba(255,255,255,.05);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 21px;
+            transition: background .2s ease, transform .15s ease;
+        }
+        .tab-btn.active .tab-icon-box {
+            background: var(--tc);
+            transform: scale(1.07);
+            box-shadow: 0 4px 14px rgba(0,0,0,.4);
+        }
+        .tab-btn:active .tab-icon-box { transform: scale(.93); }
+
+        .tab-label {
+            font-size: 10px; font-weight: 500;
+            color: rgba(255,255,255,.32);
+            transition: color .2s; white-space: nowrap;
+        }
+        .tab-btn.active .tab-label { color: rgba(255,255,255,.88); font-weight: 700; }
+
+        /* ── Controls bar ── */
+        .ctrl-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px 10px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+        }
+        .ctrl-nav {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.1);
+            color: rgba(255,255,255,.8);
+            padding: 0 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: -0.2px;
+            height: 52px;
+            transition: background .15s, transform .1s;
+        }
+        .ctrl-nav:active { background: rgba(255,255,255,.14); transform: scale(0.95); }
+        .ctrl-nav-icon { font-size: 12px; opacity: .6; }
+
+        .ctrl-pause {
+            width: 58px; height: 58px;
+            border-radius: 50%;
+            background: var(--pc, #FF3B30);
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform .15s, opacity .15s, background .5s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,.4);
+        }
+        .ctrl-pause:active { transform: scale(0.88); opacity: .85; }
+
+        /* Pause chip */
+        #pauseChip {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%,-50%) scale(.8);
+            background: rgba(0,0,0,.75); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 20px; border-radius: 30px;
+            font-size: 14px; font-weight: 600;
+            color: rgba(255,255,255,.8);
+            pointer-events: none; opacity: 0; z-index: 20;
+            transition: opacity .2s, transform .2s;
+        }
+        #pauseChip.show {
+            opacity: 1; transform: translate(-50%,-50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+
+<div id="bgGlow"></div>
+
+<header class="header">
+    <div class="logo">
+        <span class="g1">N</span><span class="o1">e</span><span class="o2">w</span><span class="g2">s</span><span class="news-suffix"> Headlines</span>
+    </div>
+    <div class="header-right">
+        <button class="audio-btn" id="audioBtn" onclick="toggleAudio()" title="Toggle audio narration"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></button>
+        <span class="hd-section" id="hdrSection">Top Stories</span>
+        <div class="live-pill">
+            <div class="live-dot"></div>
+            <span class="live-label">LIVE</span>
+        </div>
+    </div>
+</header>
+
+<div class="story-bars" id="storyBars"></div>
+
+<main class="main" id="mainArea">
+    <div class="card enter-u" style="--sc:#FF3B30">
+        <div class="card-state">
+            <div class="spinner"></div>
+            <div class="state-label">Loading news…</div>
+        </div>
+    </div>
+</main>
+
+<div id="pauseChip">⏸ Paused</div>
+
+<div class="ctrl-bar">
+    <button class="ctrl-nav" onclick="navigate(-1)">
+        <span class="ctrl-nav-icon">◀</span> Prev
+    </button>
+    <button class="ctrl-pause" id="pauseCtrlBtn" onclick="togglePause()">⏸</button>
+    <button class="ctrl-nav" onclick="navigate(1)">
+        Next <span class="ctrl-nav-icon">▶</span>
+    </button>
+</div>
+
+<nav class="tab-bar" id="tabBar"></nav>
+
+<script>
+/* ─── Config ─── */
+const DISPLAY_MS       = 10000;
+const MAX_ITEMS        = 6;
+const SWIPE_THRESHOLD  = 58;
+
+const SECTIONS = [
+    { name:'Top Stories',   short:'Top',    icon:'🔥', color:'#FF3B30',
+      url:'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en' },
+    { name:'World',         short:'World',  icon:'🌍', color:'#007AFF',
+      url:'https://news.google.com/rss/search?q=world+news&hl=en-US&gl=US&ceid=US:en' },
+    { name:'India News',    short:'India',  icon:'🇮🇳', color:'#FF6B00',
+      url:'https://news.google.com/rss/search?q=India&hl=en-IN&gl=IN&ceid=IN:en' },
+    { name:'Technology',    short:'Tech',   icon:'💻', color:'#32ADE6',
+      url:'https://news.google.com/rss/search?q=technology&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Business',      short:'Biz',    icon:'📈', color:'#FFD60A',
+      url:'https://news.google.com/rss/search?q=business+finance&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Market News',   short:'Market', icon:'📊', color:'#00C853',
+      url:'https://news.google.com/rss/search?q=stock+market+nasdaq+dow+jones+wall+street&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Sports',        short:'Sports', icon:'⚽', color:'#30D158',
+      url:'https://news.google.com/rss/search?q=sports&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Entertainment', short:'Ent.',   icon:'🎬', color:'#BF5AF2',
+      url:'https://news.google.com/rss/search?q=entertainment+celebrity&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Science',       short:'Science',icon:'🔬', color:'#64D2FF',
+      url:'https://news.google.com/rss/search?q=science&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Health',        short:'Health', icon:'🏥', color:'#FF375F',
+      url:'https://news.google.com/rss/search?q=health+medicine&hl=en-US&gl=US&ceid=US:en' }
+];
+
+/* ─── State ─── */
+let cache = {}, secIdx = 0, itemIdx = 0;
+let paused = false, autoTimer = null, progTimer = null, progStart = 0;
+let tx0=0, ty0=0, txCur=0, isH=null, touching=false, longTimer=null;
+let audioEnabled = false;
+
+/* ─── Build tab bar ─── */
+function buildTabs() {
+    document.getElementById('tabBar').innerHTML =
+        '<div class="tab-scroll" id="tabScroll">' +
+        SECTIONS.map((s,i)=>`
+            <button class="tab-btn${i===0?' active':''}" style="--tc:${s.color}"
+                    onclick="switchSection(${i})">
+                <div class="tab-icon-box">${s.icon}</div>
+                <div class="tab-label">${s.short}</div>
+            </button>`).join('') +
+        '</div>';
+}
+
+/* ─── Fetch + parse ─── */
+async function fetchSection(sec) {
+    // 1) rss2json — returns clean JSON, no XML parsing needed
+    try {
+        const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(sec.url)}`;
+        const r = await fetch(url, { cache:'no-store' });
+        if (r.ok) {
+            const j = await r.json();
+            if (j.status === 'ok' && Array.isArray(j.items) && j.items.length) {
+                return j.items.slice(0, MAX_ITEMS).map(it => ({
+                    title:   (it.title||'').replace(/\s+[-–]\s+[^-–]+$/,'').trim() || it.title || '',
+                    desc:    (it.description||it.content||'').replace(/<[^>]+>/g,'')
+                                 .replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim().slice(0,200),
+                    link:    it.link || '',
+                    source:  it.author || j.feed?.title || sec.name,
+                    pubDate: it.pubDate || ''
+                })).filter(i => i.title);
+            }
+        }
+    } catch(e) { console.warn('[rss2json]', sec.name, e.message); }
+
+    // 2) allorigins — raw XML proxy
+    try {
+        const url = `https://api.allorigins.win/get?url=${encodeURIComponent(sec.url)}`;
+        const r = await fetch(url, { cache:'no-store' });
+        if (r.ok) {
+            const j = await r.json();
+            const items = parseRSS(j.contents||'', sec);
+            if (items.length) return items;
+        }
+    } catch(e) { console.warn('[allorigins]', sec.name, e.message); }
+
+    // 3) corsproxy.io — last resort
+    try {
+        const url = `https://corsproxy.io/?${encodeURIComponent(sec.url)}`;
+        const r = await fetch(url, { cache:'no-store' });
+        if (r.ok) {
+            const xml = await r.text();
+            const items = parseRSS(xml, sec);
+            if (items.length) return items;
+        }
+    } catch(e) { console.warn('[corsproxy]', sec.name, e.message); }
+
+    return null;
+}
+
+function parseRSS(xml, sec) {
+    if (!xml) return [];
+    let doc;
+    try { doc = new DOMParser().parseFromString(xml, 'text/xml'); } catch { return []; }
+    if (doc.querySelector('parsererror')) return [];
+
+    return Array.from(doc.querySelectorAll('item')).slice(0, MAX_ITEMS).map(el => {
+        const title   = txt(el, 'title');
+        const rawDesc = txt(el, 'description');
+        const pubDate = txt(el, 'pubDate');
+        const source  = txt(el, 'source') || txt(el, 'author') || '';
+        let link = '';
+        const lels = el.getElementsByTagName('link');
+        if (lels.length) {
+            link = lels[0].textContent.trim();
+            if (!link) {
+                const sib = lels[0].nextSibling;
+                if (sib && sib.nodeType === 3) link = sib.textContent.trim();
+            }
+        }
+        if (!link) link = txt(el, 'guid');
+        const cleanTitle = title.replace(/\s+[-–]\s+[^-–]+$/,'').trim()||title;
+        const cleanDesc  = rawDesc.replace(/<[^>]+>/g,'').replace(/&[a-z#0-9]+;/gi,' ')
+                                   .replace(/\s+/g,' ').trim().slice(0,200);
+        const srcName    = source||(title.match(/\s+[-–]\s+(.+)$/)||[])[1]||sec.name;
+        return { title:cleanTitle, desc:cleanDesc, link, source:srcName, pubDate };
+    }).filter(i=>i.title);
+}
+
+function txt(el, tag) { return (el.querySelector(tag)?.textContent||'').trim(); }
+
+function relTime(str) {
+    if (!str) return '';
+    const d = new Date(str);
+    if (isNaN(d)) return '';
+    const m = Math.floor((Date.now()-d)/60000);
+    if (m<2) return 'just now';
+    if (m<60) return m+'m ago';
+    const h = Math.floor(m/60);
+    if (h<24) return h+'h ago';
+    return Math.floor(h/24)+'d ago';
+}
+
+function esc(s) {
+    return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function decodeHTML(s) {
+    const d = document.createElement('div');
+    d.innerHTML = s || '';
+    return d.textContent;
+}
+
+/* ─── Audio / TTS ─── */
+const AUDIO_SVG_OFF = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
+const AUDIO_SVG_ON  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
+function stopSpeech() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+function speakTitle(text) {
+    if (!audioEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = 0.92;
+    utt.pitch = 1.0;
+    utt.volume = 1.0;
+    window.speechSynthesis.speak(utt);
+}
+
+function toggleAudio() {
+    audioEnabled = !audioEnabled;
+    const btn = document.getElementById('audioBtn');
+    if (btn) {
+        btn.innerHTML = audioEnabled ? AUDIO_SVG_ON : AUDIO_SVG_OFF;
+        btn.classList.toggle('on', audioEnabled);
+    }
+    if (!audioEnabled) {
+        stopSpeech();
+    } else {
+        const sec = SECTIONS[secIdx], items = cache[sec.name];
+        if (items && items.length && items[itemIdx]) {
+            speakTitle(decodeHTML(items[itemIdx].title));
+        }
+    }
+}
+
+/* ─── Story bars ─── */
+function buildStoryBars(total, cur) {
+    document.getElementById('storyBars').innerHTML =
+        Array.from({length:total},(_,i)=>
+            `<div class="s-bar${i<cur?' done':''}">
+                <div class="s-bar-fill" id="sb${i}" style="width:${i<cur?100:0}%"></div>
+            </div>`
+        ).join('');
+}
+
+/* ─── Progress ─── */
+function startProgress() {
+    stopProgress();
+    progStart = Date.now();
+    const fill = document.getElementById('sb'+itemIdx);
+    if (!fill) return;
+    fill.style.width = '0%';
+    progTimer = setInterval(()=>{
+        const pct = Math.min(((Date.now()-progStart)/DISPLAY_MS)*100, 100);
+        const f = document.getElementById('sb'+itemIdx);
+        if (f) f.style.width = pct+'%';
+    }, 50);
+}
+
+function stopProgress() { clearInterval(progTimer); progTimer=null; }
+
+function startAuto() {
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(()=>{ if(!paused) navigate(1); }, DISPLAY_MS);
+}
+
+function stopAuto() { clearTimeout(autoTimer); autoTimer=null; }
+
+/* ─── Toggle pause (button) ─── */
+function togglePause() {
+    paused = !paused;
+    const btn = document.getElementById('pauseCtrlBtn');
+    if (paused) {
+        stopAuto(); stopProgress(); stopSpeech();
+        if (btn) btn.textContent = '▶';
+    } else {
+        if (btn) btn.textContent = '⏸';
+        const sec = SECTIONS[secIdx], items = cache[sec.name];
+        if (items && items.length) {
+            startProgress(); startAuto();
+            speakTitle(decodeHTML(items[itemIdx].title));
+        }
+    }
+}
+
+/* ─── Render card ─── */
+function cardHTML(item, sec, enterCls) {
+    return `<div class="card ${enterCls}" id="theCard" style="--sc:${sec.color}">
+        <div class="badge"><span class="badge-emoji">${sec.icon}</span>${sec.name}</div>
+        <div class="news-title">${esc(decodeHTML(item.title))}</div>
+        ${item.link?`<a class="read-btn" href="${esc(item.link)}" target="_blank" rel="noopener"
+            style="background:${sec.color}">Read full story <span class="read-btn-arrow">→</span></a>`:''}
+    </div>`;
+}
+
+function stateCard(color, inner) {
+    return `<div class="card enter-u" style="--sc:${color}"><div class="card-state">${inner}</div></div>`;
+}
+
+/* ─── Show item ─── */
+function showItem(items, idx, dir) {
+    itemIdx = idx;
+    const sec = SECTIONS[secIdx];
+    const enterCls = dir>=0 ? 'enter-r' : 'enter-l';
+    document.getElementById('bgGlow').style.background = sec.color;
+    document.getElementById('hdrSection').textContent = sec.name;
+    buildStoryBars(items.length, idx);
+    document.getElementById('mainArea').innerHTML = cardHTML(items[idx], sec, enterCls);
+    const pauseBtn = document.getElementById('pauseCtrlBtn');
+    if (pauseBtn) {
+        pauseBtn.style.background = sec.color;
+        pauseBtn.textContent = paused ? '▶' : '⏸';
+    }
+    if (!paused) { startProgress(); startAuto(); }
+    speakTitle(decodeHTML(items[idx].title));
+}
+
+/* ─── Switch section ─── */
+async function switchSection(i) {
+    stopAuto(); stopProgress(); stopSpeech();
+    secIdx=i; itemIdx=0;
+    document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+    const tabEl = document.querySelectorAll('.tab-btn')[i];
+    if (tabEl) tabEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    const sec = SECTIONS[i];
+    document.getElementById('bgGlow').style.background = sec.color;
+    document.getElementById('hdrSection').textContent = sec.name;
+    const pb = document.getElementById('pauseCtrlBtn');
+    if (pb) { pb.style.background = sec.color; pb.textContent = paused ? '▶' : '⏸'; }
+
+    if (!cache[sec.name]) {
+        document.getElementById('storyBars').innerHTML = '';
+        document.getElementById('mainArea').innerHTML =
+            stateCard(sec.color, `<div class="spinner"></div><div class="state-label">Loading ${esc(sec.name)}…</div>`);
+        const items = await fetchSection(sec);
+        if (items===null) {
+            document.getElementById('mainArea').innerHTML =
+                stateCard(sec.color, `<div class="state-big">⚠️</div><div class="state-label">Couldn't load news</div><div class="state-sub">Check your connection</div>`);
+            return;
+        }
+        cache[sec.name] = items;
+    }
+
+    const items = cache[sec.name];
+    if (!items.length) {
+        document.getElementById('mainArea').innerHTML =
+            stateCard(sec.color, `<div class="state-big">📭</div><div class="state-label">No news available</div>`);
+        return;
+    }
+    showItem(items, 0, 1);
+}
+
+/* ─── Navigate ─── */
+function navigate(dir) {
+    const sec = SECTIONS[secIdx];
+    const items = cache[sec.name];
+    if (!items||!items.length) return;
+    stopAuto(); stopProgress();
+    const next = itemIdx+dir;
+    if (next>=items.length) { switchSection((secIdx+1)%SECTIONS.length); return; }
+    if (next<0) {
+        if (secIdx>0) {
+            const prev = SECTIONS[secIdx-1];
+            const pi   = cache[prev.name];
+            secIdx--;
+            document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',j===secIdx));
+            const tel = document.querySelectorAll('.tab-btn')[secIdx];
+            if (tel) tel.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+            if (pi&&pi.length) showItem(pi, pi.length-1, -1);
+            else switchSection(secIdx);
+        }
+        return;
+    }
+    showItem(items, next, dir);
+}
+
+/* ─── Touch / swipe ─── */
+function getCard() { return document.getElementById('theCard'); }
+
+const mainArea = document.getElementById('mainArea');
+
+mainArea.addEventListener('touchstart', e => {
+    tx0=e.touches[0].clientX; ty0=e.touches[0].clientY;
+    txCur=0; isH=null; touching=true;
+    stopAuto(); stopProgress();
+    longTimer = setTimeout(()=>{
+        if (!touching) return;
+        paused=true;
+        const chip = document.getElementById('pauseChip');
+        chip.classList.add('show');
+        const pb = document.getElementById('pauseCtrlBtn');
+        if (pb) pb.textContent = '▶';
+        const c=getCard(); if(c){c.style.transition='transform .2s';c.style.transform='scale(0.97)';}
+    }, 480);
+}, {passive:true});
+
+mainArea.addEventListener('touchmove', e => {
+    if (!touching) return;
+    clearTimeout(longTimer);
+    const dx=e.touches[0].clientX-tx0, dy=e.touches[0].clientY-ty0;
+    if (isH===null && (Math.abs(dx)>8||Math.abs(dy)>8)) isH=Math.abs(dx)>Math.abs(dy);
+    if (isH) {
+        txCur=dx;
+        const c=getCard();
+        if (c) {
+            c.style.transition='none';
+            const rot=dx*0.022, sc=1-Math.abs(dx)*0.00018;
+            c.style.transform=`translateX(${dx}px) rotate(${rot}deg) scale(${sc})`;
+            c.style.opacity=String(Math.max(.25, 1-Math.abs(dx)*0.0028));
+        }
+    }
+}, {passive:true});
+
+mainArea.addEventListener('touchend', e => {
+    clearTimeout(longTimer);
+    touching=false;
+    const chip=document.getElementById('pauseChip');
+    chip.classList.remove('show');
+
+    const c=getCard(), dx=txCur, changedX=e.changedTouches[0].clientX, changedY=e.changedTouches[0].clientY;
+    txCur=0;
+
+    if (paused) {
+        paused=false;
+        const pb=document.getElementById('pauseCtrlBtn');
+        if (pb) pb.textContent='⏸';
+        if (c) {
+            c.style.transition='transform .25s cubic-bezier(.16,1,.3,1)';
+            c.style.transform=''; c.style.opacity='';
+        }
+        const sec=SECTIONS[secIdx], items=cache[sec.name];
+        if (items&&items.length) { startProgress(); startAuto(); }
+        isH=null; return;
+    }
+
+    if (isH && Math.abs(dx)>SWIPE_THRESHOLD) {
+        const dir=dx<0?1:-1;
+        const flyX=(dx<0?-1:1)*(window.innerWidth+120);
+        if (c) {
+            c.style.transition='transform .26s ease-in, opacity .2s ease-in';
+            c.style.transform=`translateX(${flyX}px) rotate(${dx<0?-10:10}deg)`;
+            c.style.opacity='0';
+        }
+        setTimeout(()=>navigate(dir), 210);
+    } else {
+        if (c) {
+            c.style.transition='transform .42s cubic-bezier(.16,1,.3,1), opacity .3s ease';
+            c.style.transform=''; c.style.opacity='';
+        }
+        // Short tap — left 30% = prev, right 30% = next
+        const dxAbs=Math.abs(changedX-tx0), dyAbs=Math.abs(changedY-ty0);
+        if (!isH && dxAbs<12 && dyAbs<12) {
+            const tgt = e.target;
+            if (!tgt.closest('.read-btn') && !tgt.closest('.badge')) {
+                if (changedX < window.innerWidth*0.3)      navigate(-1);
+                else if (changedX > window.innerWidth*0.7) navigate(1);
+            }
+        }
+        const sec=SECTIONS[secIdx], items=cache[sec.name];
+        if (!paused && items&&items.length) { startProgress(); startAuto(); }
+    }
+    isH=null;
+}, {passive:true});
+
+/* ─── Init ─── */
+async function init() {
+    buildTabs();
+    await switchSection(0);
+    for (let i=1; i<SECTIONS.length; i++) {
+        await new Promise(r=>setTimeout(r,380));
+        fetchSection(SECTIONS[i]).then(items=>{ if(items!==null) cache[SECTIONS[i].name]=items; });
+    }
+}
+
+init();
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+</script>
+</body>
+</html>

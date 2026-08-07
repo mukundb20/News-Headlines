@@ -1,7 +1,6 @@
-const CACHE = 'gnews-v3';
+const CACHE = 'gnews-v4';
 const ASSETS = [
-  '/',
-  '/index.html',
+  '/News.html',
   '/manifest.json',
   '/icon.svg',
   '/apple-touch-icon.png',
@@ -26,6 +25,6 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request)
-      .then(r => r || fetch(e.request).catch(() => caches.match('/index.html')))
+      .then(r => r || fetch(e.request).catch(() => caches.match('/News.html')))
   );
 });
