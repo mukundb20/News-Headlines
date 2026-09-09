@@ -164,19 +164,13 @@
         .badge-emoji { font-size: 13px; }
 
         .news-title {
-            font-size: clamp(34.5px, 9.9vw, 64.4px);
-            font-weight: 800; line-height: 1.32;
+            font-size: 64px;
+            font-weight: 800; line-height: 1.28;
             color: #f0f2f7; letter-spacing: -0.8px;
-            flex: 1;
-            min-height: 0;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            flex: 1; min-height: 0;
+            overflow: hidden;
             -webkit-user-select: text; user-select: text;
-            padding-bottom: 4px;
         }
-        .news-title::-webkit-scrollbar { width: 3px; }
-        .news-title::-webkit-scrollbar-track { background: transparent; }
-        .news-title::-webkit-scrollbar-thumb { background: rgba(255,255,255,.22); border-radius: 2px; }
 
         .read-btn {
             display: flex; align-items: center; justify-content: center;
@@ -935,6 +929,24 @@ function togglePause() {
     }
 }
 
+/* ─── Fit title text to available space ─── */
+function fitTitle() {
+    const el = document.querySelector('.news-title');
+    if (!el) return;
+    const MAX = 64, MIN = 14;
+    el.style.fontSize = MAX + 'px';
+    if (el.scrollHeight <= el.clientHeight) return;
+    let lo = MIN, hi = MAX;
+    for (let i = 0; i < 14; i++) {
+        const mid = (lo + hi) / 2;
+        el.style.fontSize = mid + 'px';
+        if (el.scrollHeight > el.clientHeight) hi = mid;
+        else lo = mid;
+    }
+    // Floor and subtract 1px safety margin to prevent subpixel overflow
+    el.style.fontSize = (Math.floor(lo) - 1) + 'px';
+}
+
 /* ─── Render card ─── */
 function cardHTML(item, sec, enterCls) {
     return `<div class="card ${enterCls}" id="theCard" style="--sc:${sec.color}">
@@ -958,6 +970,7 @@ function showItem(items, idx, dir) {
     document.getElementById('hdrSection').textContent = sec.name;
     buildStoryBars(items.length, idx);
     document.getElementById('mainArea').innerHTML = cardHTML(items[idx], sec, enterCls);
+    requestAnimationFrame(fitTitle);
     const pauseBtn = document.getElementById('pauseCtrlBtn');
     if (pauseBtn) {
         pauseBtn.style.background = sec.color;
