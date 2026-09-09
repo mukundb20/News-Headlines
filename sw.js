@@ -1,4 +1,4 @@
-const CACHE = 'gnews-v4';
+const CACHE = 'gnews-v12';
 const ASSETS = [
   '/News.html',
   '/manifest.json',
@@ -23,6 +23,8 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Never cache proxy requests — always fetch live from the local server
+  if (e.request.url.includes('/proxy?')) return;
   e.respondWith(
     caches.match(e.request)
       .then(r => r || fetch(e.request).catch(() => caches.match('/News.html')))

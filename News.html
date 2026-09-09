@@ -164,7 +164,7 @@
         .badge-emoji { font-size: 13px; }
 
         .news-title {
-            font-size: clamp(30px, 8.6vw, 56px);
+            font-size: clamp(34.5px, 9.9vw, 64.4px);
             font-weight: 800; line-height: 1.32;
             color: #f0f2f7; letter-spacing: -0.8px;
             flex: 1;
@@ -209,6 +209,14 @@
         .state-label { font-size: 14px; font-weight: 500; }
         .state-sub   { font-size: 12px; opacity: .6; }
         .state-big   { font-size: 38px; }
+        .retry-btn {
+            margin-top: 14px; padding: 10px 26px;
+            background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+            border-radius: 20px; color: rgba(255,255,255,.75);
+            font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+            transition: background .15s, transform .1s;
+        }
+        .retry-btn:active { background: rgba(255,255,255,.2); transform: scale(.95); }
 
         /* Card slide animations */
         @keyframes fromRight { from{opacity:0;transform:translateX(72px) scale(.94)} to{opacity:1;transform:none} }
@@ -337,6 +345,129 @@
         #pauseChip.show {
             opacity: 1; transform: translate(-50%,-50%) scale(1);
         }
+
+        /* ── Profile button ── */
+        .profile-btn {
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,.15);
+            background: rgba(255,255,255,.06);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: rgba(255,255,255,.45);
+            flex-shrink: 0; padding: 0;
+            font-size: 13px; font-weight: 800; letter-spacing: 0;
+            transition: background .2s, border-color .2s, color .2s, transform .1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .profile-btn svg { width: 15px; height: 15px; display: block; }
+        .profile-btn.has-user {
+            background: rgba(66,133,244,.22);
+            border-color: rgba(66,133,244,.45);
+            color: #4285F4;
+        }
+        .profile-btn:active { transform: scale(0.88); }
+
+        /* ── Settings sheet ── */
+        .settings-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,.6);
+            z-index: 100; opacity: 0; pointer-events: none;
+            transition: opacity .3s;
+        }
+        .settings-backdrop.show { opacity: 1; pointer-events: all; }
+
+        .settings-sheet {
+            position: fixed; left: 0; right: 0; bottom: 0;
+            background: #13151f;
+            border-radius: 24px 24px 0 0;
+            border-top: 1px solid rgba(255,255,255,.1);
+            padding: 0 22px max(env(safe-area-inset-bottom,0px),30px);
+            z-index: 101;
+            transform: translateY(100%);
+            transition: transform .36s cubic-bezier(.16,1,.3,1);
+        }
+        .settings-sheet.show { transform: translateY(0); }
+
+        .sheet-handle {
+            width: 36px; height: 4px; background: rgba(255,255,255,.18);
+            border-radius: 2px; margin: 14px auto 20px;
+        }
+        .sheet-title {
+            font-size: 17px; font-weight: 700; color: #f0f2f7;
+            letter-spacing: -.3px; margin-bottom: 18px;
+        }
+        .sheet-label {
+            font-size: 11.5px; font-weight: 600; letter-spacing: .7px;
+            text-transform: uppercase; color: rgba(255,255,255,.4);
+            margin-bottom: 8px;
+        }
+        .sheet-input {
+            width: 100%; background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.12); border-radius: 12px;
+            padding: 13px 15px; font-size: 15px; color: #f0f2f7;
+            font-family: inherit; outline: none; -webkit-appearance: none;
+            transition: border-color .2s; margin-bottom: 14px;
+            -webkit-user-select: text; user-select: text;
+        }
+        .sheet-input:focus { border-color: rgba(66,133,244,.55); }
+        .sheet-input::placeholder { color: rgba(255,255,255,.22); }
+
+        .sheet-save-btn {
+            width: 100%; background: #4285F4; color: white; border: none;
+            border-radius: 13px; padding: 14px; font-size: 16px;
+            font-weight: 700; cursor: pointer; letter-spacing: -.2px;
+            font-family: inherit;
+            transition: opacity .15s, transform .1s;
+        }
+        .sheet-save-btn:active { opacity: .82; transform: scale(.97); }
+
+        .sheet-user-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 14px; background: rgba(66,133,244,.1);
+            border: 1px solid rgba(66,133,244,.2); border-radius: 14px;
+            margin-bottom: 14px;
+        }
+        .sheet-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(66,133,244,.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; font-weight: 800; color: #4285F4; flex-shrink: 0;
+        }
+        .sheet-user-text { flex: 1; min-width: 0; }
+        .sheet-user-name { font-size: 14px; font-weight: 600; color: #f0f2f7; }
+        .sheet-user-email {
+            font-size: 12px; color: rgba(255,255,255,.42); margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sheet-remove-btn {
+            background: none; border: none; padding: 6px;
+            color: rgba(255,255,255,.3); cursor: pointer; flex-shrink: 0;
+        }
+        .sheet-remove-btn svg { width: 16px; height: 16px; display: block; }
+        .sheet-remove-btn:active { color: rgba(255,255,255,.7); }
+
+        .sheet-note {
+            font-size: 11.5px; color: rgba(255,255,255,.28);
+            line-height: 1.55; text-align: center; margin-top: 14px;
+        }
+
+        /* make sheet scrollable for long keyword list */
+        .settings-sheet {
+            max-height: 88dvh; overflow-y: auto;
+            -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+        }
+
+        /* ── Keywords section ── */
+        .sheet-divider {
+            height: 1px; background: rgba(255,255,255,.08);
+            margin: 20px 0 18px;
+        }
+        .sheet-subtitle {
+            font-size: 15px; font-weight: 700; color: #f0f2f7;
+            letter-spacing: -.3px; margin-bottom: 4px;
+        }
+        .sheet-subtitle-note {
+            font-size: 12px; color: rgba(255,255,255,.35);
+            margin-bottom: 14px;
+        }
     </style>
 </head>
 <body>
@@ -354,6 +485,7 @@
             <div class="live-dot"></div>
             <span class="live-label">LIVE</span>
         </div>
+        <button class="profile-btn" id="profileBtn" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
     </div>
 </header>
 
@@ -382,32 +514,73 @@
 
 <nav class="tab-bar" id="tabBar"></nav>
 
+<!-- Settings sheet -->
+<div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
+<div class="settings-sheet" id="settingsSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">News Profile</div>
+
+    <div id="sheetUserInfo" style="display:none">
+        <div class="sheet-user-card">
+            <div class="sheet-avatar" id="sheetAvatarLetter"></div>
+            <div class="sheet-user-text">
+                <div class="sheet-user-name" id="sheetUserName"></div>
+                <div class="sheet-user-email" id="sheetUserEmail"></div>
+            </div>
+            <button class="sheet-remove-btn" onclick="clearProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <p class="sheet-note">A "For You" section is active with region-matched top stories. For full Google News personalisation, sign into this account on your device.</p>
+    </div>
+
+    <div id="sheetInputSection">
+        <div class="sheet-label">Gmail Address</div>
+        <input class="sheet-input" id="emailInput" type="email"
+               placeholder="yourname@gmail.com"
+               autocomplete="email" inputmode="email"
+               autocapitalize="none" spellcheck="false">
+        <button class="sheet-save-btn" onclick="saveSettings()">Save &amp; Personalise</button>
+        <p class="sheet-note">Adds a "For You" section with region-matched top stories. For full Google News personalisation, sign into this account on your device.</p>
+    </div>
+
+    <div style="height:8px"></div>
+</div>
+
 <script>
 /* ─── Config ─── */
 const DISPLAY_MS       = 10000;
-const MAX_ITEMS        = 6;
+const MAX_ITEMS        = 4;
 const SWIPE_THRESHOLD  = 58;
 
 const SECTIONS = [
-    { name:'Top Stories',   short:'Top',    icon:'🔥', color:'#FF3B30',
+    { name:'Top Stories USA',      short:'USA',        icon:'🇺🇸', color:'#FF3B30',
       url:'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en' },
-    { name:'World',         short:'World',  icon:'🌍', color:'#007AFF',
+    { name:'Top Stories India',    short:'India',      icon:'🇮🇳', color:'#FF6B00',
+      url:'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en' },
+    { name:'World',                short:'World',      icon:'🌍', color:'#007AFF',
       url:'https://news.google.com/rss/search?q=world+news&hl=en-US&gl=US&ceid=US:en' },
-    { name:'India News',    short:'India',  icon:'🇮🇳', color:'#FF6B00',
-      url:'https://news.google.com/rss/search?q=India&hl=en-IN&gl=IN&ceid=IN:en' },
-    { name:'Technology',    short:'Tech',   icon:'💻', color:'#32ADE6',
-      url:'https://news.google.com/rss/search?q=technology&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Business',      short:'Biz',    icon:'📈', color:'#FFD60A',
-      url:'https://news.google.com/rss/search?q=business+finance&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Market News',   short:'Market', icon:'📊', color:'#00C853',
-      url:'https://news.google.com/rss/search?q=stock+market+nasdaq+dow+jones+wall+street&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Sports',        short:'Sports', icon:'⚽', color:'#30D158',
-      url:'https://news.google.com/rss/search?q=sports&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Entertainment', short:'Ent.',   icon:'🎬', color:'#BF5AF2',
-      url:'https://news.google.com/rss/search?q=entertainment+celebrity&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Science',       short:'Science',icon:'🔬', color:'#64D2FF',
-      url:'https://news.google.com/rss/search?q=science&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Health',        short:'Health', icon:'🏥', color:'#FF375F',
+    { name:'NY / NJ',               short:'NY/NJ',      icon:'🗽', color:'#FF9500',
+      url:'https://news.google.com/rss/search?q=New+York+New+Jersey&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Karnataka',            short:'Karnataka',  icon:'🏛️', color:'#FFCC00',
+      url:'https://news.google.com/rss/search?q=Karnataka&hl=en-IN&gl=IN&ceid=IN:en' },
+    { name:'Technology',           short:'Tech',       icon:'💻', color:'#32ADE6',
+      url:'https://news.google.com/rss/search?q=technology+AI&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Business USA',         short:'Biz USA',    icon:'📈', color:'#FFD60A',
+      url:'https://news.google.com/rss/search?q=business+economy&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Business India',       short:'Biz India',  icon:'💹', color:'#00C853',
+      url:'https://news.google.com/rss/search?q=business+economy&hl=en-IN&gl=IN&ceid=IN:en' },
+    { name:'Market',               short:'Market',     icon:'📊', color:'#34C759',
+      url:'https://news.google.com/rss/search?q=stock+market+nasdaq+dow+jones&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Sports USA',           short:'Sports US',  icon:'🏈', color:'#30D158',
+      url:'https://news.google.com/rss/search?q=sports+NFL+NBA+MLB&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Sports India',         short:'Sports IN',  icon:'🏏', color:'#4CD964',
+      url:'https://news.google.com/rss/search?q=cricket+sports+IPL&hl=en-IN&gl=IN&ceid=IN:en' },
+    { name:'Entertainment USA',    short:'Ent. USA',   icon:'🎬', color:'#BF5AF2',
+      url:'https://news.google.com/rss/search?q=entertainment+Hollywood+celebrity&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Entertainment India',  short:'Ent. India', icon:'🎭', color:'#AF52DE',
+      url:'https://news.google.com/rss/search?q=Bollywood+entertainment+movies&hl=en-IN&gl=IN&ceid=IN:en' },
+    { name:'Science',              short:'Science',    icon:'🔬', color:'#64D2FF',
+      url:'https://news.google.com/rss/search?q=science+research&hl=en-US&gl=US&ceid=US:en' },
+    { name:'Health',               short:'Health',     icon:'🏥', color:'#FF375F',
       url:'https://news.google.com/rss/search?q=health+medicine&hl=en-US&gl=US&ceid=US:en' }
 ];
 
@@ -416,6 +589,117 @@ let cache = {}, secIdx = 0, itemIdx = 0;
 let paused = false, autoTimer = null, progTimer = null, progStart = 0;
 let tx0=0, ty0=0, txCur=0, isH=null, touching=false, longTimer=null;
 let audioEnabled = false;
+let userEmail = localStorage.getItem('newsUserEmail') || '';
+
+const NEWS_TTL = 30 * 60 * 1000; // 30 min localStorage TTL
+function lsGet(name) {
+    try {
+        const e = JSON.parse(localStorage.getItem('gnews_' + name));
+        if (e && Date.now() - e.t < NEWS_TTL) return e.d;
+    } catch {}
+    return null;
+}
+function lsSet(name, data) {
+    try { localStorage.setItem('gnews_' + name, JSON.stringify({ t: Date.now(), d: data })); }
+    catch {}
+}
+function lsClear(name) {
+    try { localStorage.removeItem('gnews_' + name); } catch {}
+}
+
+
+/* ─── Profile / Settings ─── */
+const PERSON_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+
+function regionFromEmail(email) {
+    const d = (email.split('@')[1] || '').toLowerCase();
+    if (d.endsWith('.in'))               return { hl:'en-IN', gl:'IN', ceid:'IN:en' };
+    if (d.endsWith('.co.uk') || d.endsWith('.uk')) return { hl:'en-GB', gl:'GB', ceid:'GB:en' };
+    if (d.endsWith('.com.au') || d.endsWith('.au')) return { hl:'en-AU', gl:'AU', ceid:'AU:en' };
+    if (d.endsWith('.ca'))               return { hl:'en-CA', gl:'CA', ceid:'CA:en' };
+    return { hl:'en-US', gl:'US', ceid:'US:en' };
+}
+
+function personalizedSection(email) {
+    const r = regionFromEmail(email);
+    return {
+        name:'For You', short:'For You', icon:'👤', color:'#4285F4',
+        url:`https://news.google.com/rss?hl=${r.hl}&gl=${r.gl}&ceid=${r.ceid}`
+    };
+}
+
+function applyPersonalizedSection() {
+    if (SECTIONS[0].name === 'For You') SECTIONS.shift();
+    if (userEmail) SECTIONS.unshift(personalizedSection(userEmail));
+}
+
+function updateProfileBtn() {
+    const btn = document.getElementById('profileBtn');
+    if (!btn) return;
+    if (userEmail) {
+        btn.innerHTML = userEmail[0].toUpperCase();
+        btn.classList.add('has-user');
+    } else {
+        btn.innerHTML = PERSON_SVG;
+        btn.classList.remove('has-user');
+    }
+}
+
+function updateSheetContent() {
+    const infoEl  = document.getElementById('sheetUserInfo');
+    const inputEl = document.getElementById('sheetInputSection');
+    if (userEmail) {
+        infoEl.style.display  = 'block';
+        inputEl.style.display = 'none';
+        document.getElementById('sheetAvatarLetter').textContent = userEmail[0].toUpperCase();
+        const name = userEmail.split('@')[0].replace(/[._-]/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+        document.getElementById('sheetUserName').textContent  = name;
+        document.getElementById('sheetUserEmail').textContent = userEmail;
+    } else {
+        infoEl.style.display  = 'none';
+        inputEl.style.display = 'block';
+        document.getElementById('emailInput').value = '';
+    }
+}
+
+function openSettings() {
+    document.getElementById('settingsBackdrop').classList.add('show');
+    document.getElementById('settingsSheet').classList.add('show');
+    updateSheetContent();
+}
+
+function closeSettings() {
+    document.getElementById('settingsBackdrop').classList.remove('show');
+    document.getElementById('settingsSheet').classList.remove('show');
+}
+
+function saveSettings() {
+    const raw = (document.getElementById('emailInput').value || '').trim().toLowerCase();
+    if (!raw) return;
+    if (!raw.includes('@') || !raw.includes('.')) {
+        document.getElementById('emailInput').style.borderColor = 'rgba(234,67,53,.6)';
+        setTimeout(() => document.getElementById('emailInput').style.borderColor = '', 1200);
+        return;
+    }
+    const changed = raw !== userEmail;
+    userEmail = raw;
+    localStorage.setItem('newsUserEmail', userEmail);
+    if (changed) { cache = {}; applyPersonalizedSection(); secIdx = 0; buildTabs(); switchSection(0); }
+    updateProfileBtn();
+    closeSettings();
+}
+
+function clearProfile() {
+    userEmail = '';
+    localStorage.removeItem('newsUserEmail');
+    cache = {};
+    applyPersonalizedSection();
+    secIdx = 0;
+    buildTabs();
+    switchSection(0);
+    updateProfileBtn();
+    closeSettings();
+}
 
 /* ─── Build tab bar ─── */
 function buildTabs() {
@@ -431,11 +715,31 @@ function buildTabs() {
 }
 
 /* ─── Fetch + parse ─── */
-async function fetchSection(sec) {
-    // 1) rss2json — returns clean JSON, no XML parsing needed
+async function fetchWT(url, ms=9000) {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), ms);
     try {
-        const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(sec.url)}`;
-        const r = await fetch(url, { cache:'no-store' });
+        const r = await fetch(url, { cache:'no-store', signal: ctrl.signal });
+        clearTimeout(tid); return r;
+    } catch(e) { clearTimeout(tid); throw e; }
+}
+
+async function tryFeedUrl(feedUrl, sec) {
+    // 0) Local server proxy — Python fetches directly, no bot detection
+    try {
+        const r = await fetchWT(`/proxy?url=${encodeURIComponent(feedUrl)}`);
+        if (r.ok) {
+            const xml = await r.text();
+            if (xml.trim().startsWith('<')) {
+                const items = parseRSS(xml, sec);
+                if (items.length) return items;
+            }
+        }
+    } catch(e) { console.warn('[local-proxy]', sec.name, e.message); }
+
+    // 1) rss2json — clean JSON
+    try {
+        const r = await fetchWT(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
         if (r.ok) {
             const j = await r.json();
             if (j.status === 'ok' && Array.isArray(j.items) && j.items.length) {
@@ -451,29 +755,47 @@ async function fetchSection(sec) {
         }
     } catch(e) { console.warn('[rss2json]', sec.name, e.message); }
 
-    // 2) allorigins — raw XML proxy
+    // 2) allorigins raw — returns XML directly
     try {
-        const url = `https://api.allorigins.win/get?url=${encodeURIComponent(sec.url)}`;
-        const r = await fetch(url, { cache:'no-store' });
-        if (r.ok) {
-            const j = await r.json();
-            const items = parseRSS(j.contents||'', sec);
-            if (items.length) return items;
-        }
-    } catch(e) { console.warn('[allorigins]', sec.name, e.message); }
-
-    // 3) corsproxy.io — last resort
-    try {
-        const url = `https://corsproxy.io/?${encodeURIComponent(sec.url)}`;
-        const r = await fetch(url, { cache:'no-store' });
+        const r = await fetchWT(`https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`);
         if (r.ok) {
             const xml = await r.text();
-            const items = parseRSS(xml, sec);
-            if (items.length) return items;
+            if (xml.trim().startsWith('<')) {
+                const items = parseRSS(xml, sec);
+                if (items.length) return items;
+            }
+        }
+    } catch(e) { console.warn('[allorigins-raw]', sec.name, e.message); }
+
+    // 3) codetabs proxy
+    try {
+        const r = await fetchWT(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(feedUrl)}`);
+        if (r.ok) {
+            const xml = await r.text();
+            if (xml.trim().startsWith('<')) {
+                const items = parseRSS(xml, sec);
+                if (items.length) return items;
+            }
+        }
+    } catch(e) { console.warn('[codetabs]', sec.name, e.message); }
+
+    // 4) corsproxy.io
+    try {
+        const r = await fetchWT(`https://corsproxy.io/?${encodeURIComponent(feedUrl)}`);
+        if (r.ok) {
+            const xml = await r.text();
+            if (xml.trim().startsWith('<')) {
+                const items = parseRSS(xml, sec);
+                if (items.length) return items;
+            }
         }
     } catch(e) { console.warn('[corsproxy]', sec.name, e.message); }
 
     return null;
+}
+
+async function fetchSection(sec) {
+    return await tryFeedUrl(sec.url, sec);
 }
 
 function parseRSS(xml, sec) {
@@ -659,16 +981,29 @@ async function switchSection(i) {
     if (pb) { pb.style.background = sec.color; pb.textContent = paused ? '▶' : '⏸'; }
 
     if (!cache[sec.name]) {
+        // Serve from localStorage immediately if available (stale-while-revalidate)
+        const stored = lsGet(sec.name);
+        if (stored && stored.length) {
+            cache[sec.name] = stored;
+            showItem(stored, 0, 1);
+            // Refresh in background silently
+            fetchSection(sec).then(fresh => {
+                if (fresh && fresh.length) { cache[sec.name] = fresh; lsSet(sec.name, fresh); }
+            });
+            return;
+        }
+        // Nothing cached — fetch fresh with loading indicator
         document.getElementById('storyBars').innerHTML = '';
         document.getElementById('mainArea').innerHTML =
             stateCard(sec.color, `<div class="spinner"></div><div class="state-label">Loading ${esc(sec.name)}…</div>`);
         const items = await fetchSection(sec);
-        if (items===null) {
+        if (items === null) {
             document.getElementById('mainArea').innerHTML =
-                stateCard(sec.color, `<div class="state-big">⚠️</div><div class="state-label">Couldn't load news</div><div class="state-sub">Check your connection</div>`);
+                stateCard(sec.color, `<div class="state-big">⚠️</div><div class="state-label">Couldn't load news</div><div class="state-sub">Check your connection</div><button class="retry-btn" onclick="switchSection(${i})">↻ Retry</button>`);
             return;
         }
         cache[sec.name] = items;
+        lsSet(sec.name, items);
     }
 
     const items = cache[sec.name];
@@ -794,12 +1129,11 @@ mainArea.addEventListener('touchend', e => {
 
 /* ─── Init ─── */
 async function init() {
+    if (userEmail) applyPersonalizedSection();
     buildTabs();
+    updateProfileBtn();
     await switchSection(0);
-    for (let i=1; i<SECTIONS.length; i++) {
-        await new Promise(r=>setTimeout(r,380));
-        fetchSection(SECTIONS[i]).then(items=>{ if(items!==null) cache[SECTIONS[i].name]=items; });
-    }
+    // No background prefetch — sections load on demand to avoid rate-limiting proxies
 }
 
 init();
