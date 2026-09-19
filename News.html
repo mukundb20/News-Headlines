@@ -545,38 +545,45 @@ const DISPLAY_MS       = 10000;
 const MAX_ITEMS        = 4;
 const SWIPE_THRESHOLD  = 58;
 
-const SECTIONS = [
-    { name:'Top Stories USA',      short:'USA',        icon:'🇺🇸', color:'#FF3B30',
-      url:'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en' },
-    { name:'Top Stories India',    short:'India',      icon:'🇮🇳', color:'#FF6B00',
-      url:'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en' },
-    { name:'World',                short:'World',      icon:'🌍', color:'#007AFF',
-      url:'https://news.google.com/rss/search?q=world+news&hl=en-US&gl=US&ceid=US:en' },
-    { name:'NY / NJ',               short:'NY/NJ',      icon:'🗽', color:'#FF9500',
-      url:'https://news.google.com/rss/search?q=New+York+New+Jersey&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Karnataka',            short:'Karnataka',  icon:'🏛️', color:'#FFCC00',
-      url:'https://news.google.com/rss/search?q=Karnataka&hl=en-IN&gl=IN&ceid=IN:en' },
-    { name:'Technology',           short:'Tech',       icon:'💻', color:'#32ADE6',
-      url:'https://news.google.com/rss/search?q=technology+AI&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Business USA',         short:'Biz USA',    icon:'📈', color:'#FFD60A',
-      url:'https://news.google.com/rss/search?q=business+economy&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Business India',       short:'Biz India',  icon:'💹', color:'#00C853',
-      url:'https://news.google.com/rss/search?q=business+economy&hl=en-IN&gl=IN&ceid=IN:en' },
-    { name:'Market',               short:'Market',     icon:'📊', color:'#34C759',
-      url:'https://news.google.com/rss/search?q=stock+market+nasdaq+dow+jones&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Sports USA',           short:'Sports US',  icon:'🏈', color:'#30D158',
-      url:'https://news.google.com/rss/search?q=sports+NFL+NBA+MLB&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Sports India',         short:'Sports IN',  icon:'🏏', color:'#4CD964',
-      url:'https://news.google.com/rss/search?q=cricket+sports+IPL&hl=en-IN&gl=IN&ceid=IN:en' },
-    { name:'Entertainment USA',    short:'Ent. USA',   icon:'🎬', color:'#BF5AF2',
-      url:'https://news.google.com/rss/search?q=entertainment+Hollywood+celebrity&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Entertainment India',  short:'Ent. India', icon:'🎭', color:'#AF52DE',
-      url:'https://news.google.com/rss/search?q=Bollywood+entertainment+movies&hl=en-IN&gl=IN&ceid=IN:en' },
-    { name:'Science',              short:'Science',    icon:'🔬', color:'#64D2FF',
-      url:'https://news.google.com/rss/search?q=science+research&hl=en-US&gl=US&ceid=US:en' },
-    { name:'Health',               short:'Health',     icon:'🏥', color:'#FF375F',
-      url:'https://news.google.com/rss/search?q=health+medicine&hl=en-US&gl=US&ceid=US:en' }
-];
+// Google News topic IDs — only IDs verified to still return valid RSS
+const GN_TOPIC = {
+    sports: 'CAAqJggKIiBDQkFTRWdvSUwyMHZNRFp1ZEdvU0FtVnVHZ0pWVXlnQVAB'
+};
+function gnTopic(id, hl, gl, ceid) {
+    return `https://news.google.com/rss/topics/${id}?hl=${hl}&gl=${gl}&ceid=${ceid}`;
+}
+function gnSearch(q, hl, gl, ceid) {
+    return `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=${hl}&gl=${gl}&ceid=${ceid}`;
+}
+
+let SECTIONS = [];
+
+function buildSections() {
+    return [
+        { name:'Top Stories USA',     short:'USA',        icon:'🇺🇸', color:'#FF3B30',
+          url:'https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en' },
+        { name:'Top Stories India',   short:'India',      icon:'🇮🇳', color:'#FF6B00',
+          url:'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en' },
+        { name:'World',               short:'World',      icon:'🌍',  color:'#007AFF',
+          url: gnSearch('world news', 'en-US', 'US', 'US:en') },
+        { name:'Local',               short:'Local',      icon:'📍',  color:'#FF9500',
+          url: gnSearch('New York New Jersey Middlesex County NJ', 'en-US', 'US', 'US:en') },
+        { name:'Karnataka',           short:'KA',         icon:'🏛️',  color:'#FFCC00',
+          url: gnSearch('Karnataka', 'en-IN', 'IN', 'IN:en') },
+        { name:'Technology',          short:'Tech',       icon:'💻',  color:'#32ADE6',
+          url: gnSearch('technology', 'en-US', 'US', 'US:en') },
+        { name:'Business USA',        short:'Biz USA',    icon:'📈',  color:'#FFD60A',
+          url: gnSearch('business', 'en-US', 'US', 'US:en') },
+        { name:'Market',              short:'Market',     icon:'📊',  color:'#34C759',
+          url: gnSearch('stock market nasdaq dow jones', 'en-US', 'US', 'US:en') },
+        { name:'Sports USA',          short:'Sports US',  icon:'🏈',  color:'#30D158',
+          url: gnTopic(GN_TOPIC.sports, 'en-US', 'US', 'US:en') },
+        { name:'Sports India',        short:'Sports IN',  icon:'🏏',  color:'#4CD964',
+          url: gnSearch('cricket IPL tennis badminton sports India', 'en-IN', 'IN', 'IN:en') },
+        { name:'Science',             short:'Science',    icon:'🔬',  color:'#64D2FF',
+          url: gnSearch('science', 'en-US', 'US', 'US:en') }
+    ];
+}
 
 /* ─── State ─── */
 let cache = {}, secIdx = 0, itemIdx = 0;
@@ -614,18 +621,6 @@ function regionFromEmail(email) {
     return { hl:'en-US', gl:'US', ceid:'US:en' };
 }
 
-function personalizedSection(email) {
-    const r = regionFromEmail(email);
-    return {
-        name:'For You', short:'For You', icon:'👤', color:'#4285F4',
-        url:`https://news.google.com/rss?hl=${r.hl}&gl=${r.gl}&ceid=${r.ceid}`
-    };
-}
-
-function applyPersonalizedSection() {
-    if (SECTIONS[0].name === 'For You') SECTIONS.shift();
-    if (userEmail) SECTIONS.unshift(personalizedSection(userEmail));
-}
 
 function updateProfileBtn() {
     const btn = document.getElementById('profileBtn');
@@ -678,7 +673,7 @@ function saveSettings() {
     const changed = raw !== userEmail;
     userEmail = raw;
     localStorage.setItem('newsUserEmail', userEmail);
-    if (changed) { cache = {}; applyPersonalizedSection(); secIdx = 0; buildTabs(); switchSection(0); }
+    if (changed) { cache = {}; SECTIONS = buildSections(); secIdx = 0; buildTabs(); switchSection(0); }
     updateProfileBtn();
     closeSettings();
 }
@@ -687,10 +682,10 @@ function clearProfile() {
     userEmail = '';
     localStorage.removeItem('newsUserEmail');
     cache = {};
-    applyPersonalizedSection();
+    SECTIONS = [];
     secIdx = 0;
     buildTabs();
-    switchSection(0);
+    showSignInRequired();
     updateProfileBtn();
     closeSettings();
 }
@@ -731,7 +726,31 @@ async function tryFeedUrl(feedUrl, sec) {
         }
     } catch(e) { console.warn('[local-proxy]', sec.name, e.message); }
 
-    // 1) rss2json — clean JSON
+    // 1) thingproxy — simple URL-append proxy
+    try {
+        const r = await fetchWT(`https://thingproxy.freeboard.io/fetch/${feedUrl}`);
+        if (r.ok) {
+            const xml = await r.text();
+            if (xml.trim().startsWith('<')) {
+                const items = parseRSS(xml, sec);
+                if (items.length) return items;
+            }
+        }
+    } catch(e) { console.warn('[thingproxy]', sec.name, e.message); }
+
+    // 2) corsproxy.io
+    try {
+        const r = await fetchWT(`https://corsproxy.io/?${encodeURIComponent(feedUrl)}`);
+        if (r.ok) {
+            const xml = await r.text();
+            if (xml.trim().startsWith('<')) {
+                const items = parseRSS(xml, sec);
+                if (items.length) return items;
+            }
+        }
+    } catch(e) { console.warn('[corsproxy]', sec.name, e.message); }
+
+    // 3) rss2json — JSON format (last: rate-limits under load)
     try {
         const r = await fetchWT(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
         if (r.ok) {
@@ -748,42 +767,6 @@ async function tryFeedUrl(feedUrl, sec) {
             }
         }
     } catch(e) { console.warn('[rss2json]', sec.name, e.message); }
-
-    // 2) allorigins raw — returns XML directly
-    try {
-        const r = await fetchWT(`https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`);
-        if (r.ok) {
-            const xml = await r.text();
-            if (xml.trim().startsWith('<')) {
-                const items = parseRSS(xml, sec);
-                if (items.length) return items;
-            }
-        }
-    } catch(e) { console.warn('[allorigins-raw]', sec.name, e.message); }
-
-    // 3) codetabs proxy
-    try {
-        const r = await fetchWT(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(feedUrl)}`);
-        if (r.ok) {
-            const xml = await r.text();
-            if (xml.trim().startsWith('<')) {
-                const items = parseRSS(xml, sec);
-                if (items.length) return items;
-            }
-        }
-    } catch(e) { console.warn('[codetabs]', sec.name, e.message); }
-
-    // 4) corsproxy.io
-    try {
-        const r = await fetchWT(`https://corsproxy.io/?${encodeURIComponent(feedUrl)}`);
-        if (r.ok) {
-            const xml = await r.text();
-            if (xml.trim().startsWith('<')) {
-                const items = parseRSS(xml, sec);
-                if (items.length) return items;
-            }
-        }
-    } catch(e) { console.warn('[corsproxy]', sec.name, e.message); }
 
     return null;
 }
@@ -871,7 +854,7 @@ function toggleAudio() {
     }
     if (!audioEnabled) {
         stopSpeech();
-    } else {
+    } else if (SECTIONS.length) {
         const sec = SECTIONS[secIdx], items = cache[sec.name];
         if (items && items.length && items[itemIdx]) {
             speakTitle(decodeHTML(items[itemIdx].title));
@@ -914,6 +897,7 @@ function stopAuto() { clearTimeout(autoTimer); autoTimer=null; }
 
 /* ─── Toggle pause (button) ─── */
 function togglePause() {
+    if (!SECTIONS.length) return;
     paused = !paused;
     const btn = document.getElementById('pauseCtrlBtn');
     if (paused) {
@@ -959,6 +943,20 @@ function cardHTML(item, sec, enterCls) {
 
 function stateCard(color, inner) {
     return `<div class="card enter-u" style="--sc:${color}"><div class="card-state">${inner}</div></div>`;
+}
+
+function showSignInRequired() {
+    const c = '#4285F4';
+    document.getElementById('storyBars').innerHTML = '';
+    document.getElementById('hdrSection').textContent = 'News Headlines';
+    document.getElementById('bgGlow').style.background = c;
+    const pb = document.getElementById('pauseCtrlBtn');
+    if (pb) pb.style.background = c;
+    document.getElementById('mainArea').innerHTML = stateCard(c,
+        `<div class="state-big">📧</div>
+         <div class="state-label">Enter your Gmail to get started</div>
+         <div class="state-sub">News tailored to your region</div>
+         <button class="retry-btn" onclick="openSettings()">Get started →</button>`);
 }
 
 /* ─── Show item ─── */
@@ -1092,6 +1090,7 @@ mainArea.addEventListener('touchmove', e => {
 mainArea.addEventListener('touchend', e => {
     clearTimeout(longTimer);
     touching=false;
+    if (!SECTIONS.length) { isH=null; return; }
     const chip=document.getElementById('pauseChip');
     chip.classList.remove('show');
 
@@ -1142,11 +1141,15 @@ mainArea.addEventListener('touchend', e => {
 
 /* ─── Init ─── */
 async function init() {
-    if (userEmail) applyPersonalizedSection();
-    buildTabs();
     updateProfileBtn();
-    await switchSection(0);
-    // No background prefetch — sections load on demand to avoid rate-limiting proxies
+    if (userEmail) {
+        SECTIONS = buildSections();
+        buildTabs();
+        await switchSection(0);
+    } else {
+        buildTabs();
+        showSignInRequired();
+    }
 }
 
 init();
