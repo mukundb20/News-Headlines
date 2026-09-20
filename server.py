@@ -2,12 +2,18 @@ import http.server
 import urllib.request
 import urllib.parse
 import socket
+import ssl
 import os
 
 socket.setdefaulttimeout(12)
 
 class ProxyHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        # Block private key from being served
+        if self.path.rstrip('/') in ('/key.pem',):
+            self.send_response(403)
+            self.end_headers()
+            return
         if self.path.startswith('/proxy?'):
             parsed = urllib.parse.urlparse(self.path)
             params = urllib.parse.parse_qs(parsed.query)
@@ -48,6 +54,21 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     port = 8765
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
     with http.server.HTTPServer(('0.0.0.0', port), ProxyHandler) as httpd:
-        print(f'News server on port {port}')
+        use_https = os.path.exists('cert.pem') and os.path.exists('key.pem')
+        if use_https:
+            ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ctx.load_cert_chain('cert.pem', 'key.pem')
+            httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
+
+        try:
+            local_ip = socket.gethostbyname(socket.gethostname())
+        except Exception:
+            local_ip = '127.0.0.1'
+
+        scheme = 'https' if use_https else 'http'
+        print(f'News server → {scheme}://{local_ip}:{port}/News.html')
+        if not use_https:
+            print('  Tip: run generate_cert.py to enable HTTPS for full PWA support on iOS')
         httpd.serve_forever()

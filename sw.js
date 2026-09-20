@@ -1,4 +1,4 @@
-const CACHE = 'gnews-v26';
+const CACHE = 'gnews-v27';
 const ASSETS = [
   '/News.html',
   '/manifest.json',
