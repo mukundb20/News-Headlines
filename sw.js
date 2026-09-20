@@ -1,11 +1,11 @@
-const CACHE = 'gnews-v27';
+const CACHE = 'gnews-v28';
 const ASSETS = [
-  '/News.html',
-  '/manifest.json',
-  '/icon.svg',
-  '/apple-touch-icon.png',
-  '/icon-192.png',
-  '/icon-512.png'
+  'News.html',
+  'manifest.json',
+  'icon.svg',
+  'apple-touch-icon.png',
+  'icon-192.png',
+  'icon-512.png'
 ];
 
 self.addEventListener('install', e => {
@@ -23,10 +23,10 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Never cache proxy requests — always fetch live from the local server
+  // Never cache proxy requests — always fetch live
   if (e.request.url.includes('/proxy?')) return;
   e.respondWith(
     caches.match(e.request)
-      .then(r => r || fetch(e.request).catch(() => caches.match('/News.html')))
+      .then(r => r || fetch(e.request).catch(() => caches.match('News.html')))
   );
 });
