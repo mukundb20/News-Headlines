@@ -536,6 +536,15 @@
         <p class="sheet-note">Adds a "For You" section with region-matched top stories. For full Google News personalisation, sign into this account on your device.</p>
     </div>
 
+    <div style="height:1px; background:rgba(255,255,255,.1); margin:16px 0"></div>
+    <div class="sheet-label">US State / City</div>
+    <input class="sheet-input" id="usLocalInput" type="text" placeholder="e.g. New York"
+           autocapitalize="words" spellcheck="false">
+    <div class="sheet-label" style="margin-top:12px">India State / City</div>
+    <input class="sheet-input" id="indiaLocalInput" type="text" placeholder="e.g. Karnataka"
+           autocapitalize="words" spellcheck="false">
+    <button class="sheet-save-btn" onclick="saveLocations()" style="margin-top:12px">Save Locations</button>
+
     <div style="height:8px"></div>
 </div>
 
@@ -566,10 +575,10 @@ function buildSections() {
           url:'https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en' },
         { name:'World',               short:'World',      icon:'🌍',  color:'#007AFF',
           url: gnSearch('world news', 'en-US', 'US', 'US:en') },
-        { name:'Local',               short:'Local',      icon:'📍',  color:'#FF9500',
-          url: gnSearch('New York New Jersey Middlesex County NJ', 'en-US', 'US', 'US:en') },
-        { name:'Karnataka',           short:'KA',         icon:'🏛️',  color:'#FFCC00',
-          url: gnSearch('Karnataka', 'en-IN', 'IN', 'IN:en') },
+        { name:'US Local',             short:'US Local',   icon:'📍',  color:'#FF9500',
+          url: gnSearch(usLocalName, 'en-US', 'US', 'US:en') },
+        { name:'India Local',         short:'India Local',icon:'🏛️',  color:'#FFCC00',
+          url: gnSearch(indiaLocalName, 'en-IN', 'IN', 'IN:en') },
         { name:'Technology',          short:'Tech',       icon:'💻',  color:'#32ADE6',
           url: gnSearch('technology', 'en-US', 'US', 'US:en') },
         { name:'Business USA',        short:'Biz USA',    icon:'📈',  color:'#FFD60A',
@@ -581,7 +590,9 @@ function buildSections() {
         { name:'Sports India',        short:'Sports IN',  icon:'🏏',  color:'#4CD964',
           url: gnSearch('cricket IPL tennis badminton sports India', 'en-IN', 'IN', 'IN:en') },
         { name:'Science',             short:'Science',    icon:'🔬',  color:'#64D2FF',
-          url: gnSearch('science', 'en-US', 'US', 'US:en') }
+          url: gnSearch('science', 'en-US', 'US', 'US:en') },
+        { name:'Health',              short:'Health',     icon:'🏥',  color:'#FF375F',
+          url: gnSearch('health', 'en-US', 'US', 'US:en') }
     ];
 }
 
@@ -590,7 +601,9 @@ let cache = {}, secIdx = 0, itemIdx = 0;
 let paused = false, autoTimer = null, progTimer = null, progStart = 0;
 let tx0=0, ty0=0, txCur=0, isH=null, touching=false, longTimer=null;
 let audioEnabled = false;
-let userEmail = localStorage.getItem('newsUserEmail') || '';
+let userEmail      = localStorage.getItem('newsUserEmail')  || '';
+let usLocalName    = localStorage.getItem('newsUSLocal')    || 'New York';
+let indiaLocalName = localStorage.getItem('newsIndiaLocal') || 'Karnataka';
 
 const NEWS_TTL = 30 * 60 * 1000; // 30 min localStorage TTL
 function lsGet(name) {
@@ -649,6 +662,8 @@ function updateSheetContent() {
         inputEl.style.display = 'block';
         document.getElementById('emailInput').value = '';
     }
+    document.getElementById('usLocalInput').value    = usLocalName;
+    document.getElementById('indiaLocalInput').value = indiaLocalName;
 }
 
 function openSettings() {
@@ -675,6 +690,16 @@ function saveSettings() {
     localStorage.setItem('newsUserEmail', userEmail);
     if (changed) { cache = {}; SECTIONS = buildSections(); secIdx = 0; buildTabs(); switchSection(0); }
     updateProfileBtn();
+    closeSettings();
+}
+
+function saveLocations() {
+    const usVal    = (document.getElementById('usLocalInput').value    || '').trim();
+    const indiaVal = (document.getElementById('indiaLocalInput').value || '').trim();
+    let changed = false;
+    if (usVal && usVal !== usLocalName)         { usLocalName    = usVal;    localStorage.setItem('newsUSLocal',    usVal);    changed = true; }
+    if (indiaVal && indiaVal !== indiaLocalName) { indiaLocalName = indiaVal; localStorage.setItem('newsIndiaLocal', indiaVal); changed = true; }
+    if (changed) { cache = {}; SECTIONS = buildSections(); secIdx = 0; buildTabs(); switchSection(0); }
     closeSettings();
 }
 
